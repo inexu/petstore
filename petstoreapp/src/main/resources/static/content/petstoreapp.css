@@ -17,6 +17,11 @@
 	font-weight: 600;color: #3C7BB7;
 }
 
+.version {
+	color: #c73cb7;
+	font-size: 0.5em;
+}
+
 a {
 	text-decoration:none !important;
 }
