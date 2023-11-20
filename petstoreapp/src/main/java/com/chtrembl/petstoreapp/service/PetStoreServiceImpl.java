@@ -4,6 +4,24 @@ package com.chtrembl.petstoreapp.service;
  * Implementation for service calls to the APIM/AKS
  */
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Random;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import javax.annotation.PostConstruct;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientException;
+
 import com.chtrembl.petstoreapp.model.Category;
 import com.chtrembl.petstoreapp.model.ContainerEnvironment;
 import com.chtrembl.petstoreapp.model.Order;
@@ -15,24 +33,10 @@ import com.chtrembl.petstoreapp.model.WebRequest;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.BodyInserters;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientException;
-import reactor.core.publisher.Mono;
+import com.microsoft.applicationinsights.TelemetryClient;
+import com.microsoft.applicationinsights.telemetry.SeverityLevel;
 
-import javax.annotation.PostConstruct;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
+import reactor.core.publisher.Mono;
 
 @Service
 public class PetStoreServiceImpl implements PetStoreService {
@@ -119,6 +123,16 @@ public class PetStoreServiceImpl implements PetStoreService {
 
 	@Override
 	public Collection<Product> getProducts(String category, List<Tag> tags) {
+		TelemetryClient telemetryClient = new TelemetryClient();
+		telemetryClient.getContext().getUser().setId(sessionUser.getSessionId());
+		telemetryClient.trackEvent("Products");
+		telemetryClient.trackTrace("getProducts: sessionId=" + sessionUser.getSessionId() + ", userName="
+			  + sessionUser.getName(), SeverityLevel.Information);
+
+		// Fails in 50% of cases
+		if (new Random().nextInt(2) == 0)
+			throw new RuntimeException("Cannot move further");
+
 		List<Product> products = new ArrayList<>();
 
 		try {
@@ -172,6 +186,10 @@ public class PetStoreServiceImpl implements PetStoreService {
 			product.setId((long) 0);
 			products.add(product);
 		}
+
+		telemetryClient.trackMetric("Products Count", products.size());
+		logger.info("Showing {} products to customer", products.size());
+
 		return products;
 	}
 

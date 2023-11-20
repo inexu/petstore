@@ -9,6 +9,7 @@ import org.springframework.context.annotation.ComponentScan;
 
 import com.chtrembl.petstore.pet.model.ContainerEnvironment;
 import com.chtrembl.petstore.pet.model.DataPreload;
+import com.microsoft.applicationinsights.attach.ApplicationInsights;
 
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
@@ -35,6 +36,7 @@ public class Swagger2SpringBoot implements CommandLineRunner {
 	}
 
 	public static void main(String[] args) throws Exception {
+		ApplicationInsights.attach();
 		new SpringApplication(Swagger2SpringBoot.class).run(args);
 	}
 
