@@ -7,7 +7,6 @@ package com.chtrembl.petstoreapp.service;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Random;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
@@ -24,13 +23,16 @@ import org.springframework.web.reactive.function.client.WebClientException;
 
 import com.chtrembl.petstoreapp.model.Category;
 import com.chtrembl.petstoreapp.model.ContainerEnvironment;
+import com.chtrembl.petstoreapp.model.Customer;
 import com.chtrembl.petstoreapp.model.Order;
+import com.chtrembl.petstoreapp.model.OrderReservation;
 import com.chtrembl.petstoreapp.model.Pet;
 import com.chtrembl.petstoreapp.model.Product;
 import com.chtrembl.petstoreapp.model.Tag;
 import com.chtrembl.petstoreapp.model.User;
 import com.chtrembl.petstoreapp.model.WebRequest;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.microsoft.applicationinsights.TelemetryClient;
@@ -49,6 +51,7 @@ public class PetStoreServiceImpl implements PetStoreService {
 	private WebClient petServiceWebClient = null;
 	private WebClient productServiceWebClient = null;
 	private WebClient orderServiceWebClient = null;
+	private WebClient orderItemsReserverClient = null;
 
 	public PetStoreServiceImpl(User sessionUser, ContainerEnvironment containerEnvironment, WebRequest webRequest) {
 		this.sessionUser = sessionUser;
@@ -65,6 +68,9 @@ public class PetStoreServiceImpl implements PetStoreService {
 				.baseUrl(this.containerEnvironment.getPetStoreProductServiceURL()).build();
 		this.orderServiceWebClient = WebClient.builder().baseUrl(this.containerEnvironment.getPetStoreOrderServiceURL())
 				.build();
+		this.orderItemsReserverClient = WebClient.builder()
+			  .baseUrl("")
+			  .build();
 	}
 
 	@Override
@@ -130,8 +136,8 @@ public class PetStoreServiceImpl implements PetStoreService {
 			  + sessionUser.getName(), SeverityLevel.Information);
 
 		// Fails in 50% of cases
-		if (new Random().nextInt(2) == 0)
-			throw new RuntimeException("Cannot move further");
+//		if (new Random().nextInt(2) == 0)
+//			throw new RuntimeException("Cannot move further");
 
 		List<Product> products = new ArrayList<>();
 
@@ -232,9 +238,38 @@ public class PetStoreServiceImpl implements PetStoreService {
 					.retrieve()
 					.bodyToMono(Order.class).block();
 
+			sendOrderReservation(updatedOrder, sessionUser, consumer);
 		} catch (Exception e) {
 			logger.warn(e.getMessage());
 		}
+	}
+
+	private void sendOrderReservation(Order order, User user, Consumer<HttpHeaders> consumer) throws JsonProcessingException
+	{
+		logger.info("Sending order reservation.");
+
+		Customer customer = new Customer();
+		customer.setSessionId(user.getSessionId());
+		customer.setName(user.getName());
+
+		OrderReservation orderReservation = new OrderReservation();
+		orderReservation.setUser(customer);
+		orderReservation.setOrder(order);
+
+		String orderReservationJson = new ObjectMapper().setSerializationInclusion(Include.NON_NULL)
+			  .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
+			  .configure(SerializationFeature.FAIL_ON_SELF_REFERENCES, false).writeValueAsString(orderReservation);
+
+		orderItemsReserverClient.post().uri("https://carts-function.azurewebsites.net/api/OrderItemsReserver")
+			  .body(BodyInserters.fromPublisher(Mono.just(orderReservationJson), String.class))
+			  .accept(MediaType.APPLICATION_JSON)
+			  .headers(consumer)
+			  .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+			  .header("Cache-Control", "no-cache")
+			  .retrieve()
+			  .bodyToMono(Order.class).block();
+
+		logger.info("Successfully sent order reservation.");
 	}
 
 	@Override
