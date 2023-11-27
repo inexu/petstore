@@ -2,7 +2,7 @@ springfoxdocumentation:
   swagger:
     v2:
       path: /api-docs
-      
+
 server:
   port: ${PETSTOREORDERSERVICE_SERVER_PORT:8080}
 
@@ -17,15 +17,44 @@ spring:
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
+  cloud:
+    azure:
+      cosmos:
+        endpoint: https://petstore-cosmos.mongo.cosmos.azure.com:443/
+        database: petstoreorder1q
+        key: 3a9vgkmmTw8o37r5Zjl2R5uJAMeu0vrBAs7Oxf9O8WvOy3hkQIQtrNKM3p2Sb0wif7fSZE6CZYIDACDbnKCb7A==
+        secondaryKey: 9ctVtNJyiwLIDA1uAAcOZIrTfPBK0rGbZ8cNfh2BKeHRhMOcagCWKnyabKtl38svV9tlyVJ9yualACDbVApojw==
+        populate-query-metrics: true
+        responseDiagnosticsEnabled: true
+
+#azure:
+#  cosmosdb:
+#    uri: https://petstore-cosmos.mongo.cosmos.azure.com:443/
+#    database: petstoreorder1q
+#    key: 3a9vgkmmTw8o37r5Zjl2R5uJAMeu0vrBAs7Oxf9O8WvOy3hkQIQtrNKM3p2Sb0wif7fSZE6CZYIDACDbnKCb7A==
+#    secondaryKey: 9ctVtNJyiwLIDA1uAAcOZIrTfPBK0rGbZ8cNfh2BKeHRhMOcagCWKnyabKtl38svV9tlyVJ9yualACDbVApojw==
+
+app:
+  service:
+    order:
+      externalDatabase:
+        enabled: true
+
+logging:
+  level:
+    org:
+      springframework:
+        context: DEBUG
+debug: true
 
 management:
   endpoints:
     web:
       exposure:
-        include: "*"       
+        include: "*"
   trace:
     http:
-      enabled: true 
+      enabled: true
   endpoint:
     httptrace:
       enabled: true

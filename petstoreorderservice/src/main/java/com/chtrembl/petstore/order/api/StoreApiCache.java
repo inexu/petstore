@@ -3,6 +3,7 @@ package com.chtrembl.petstore.order.api;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
+import javax.annotation.Resource;
 
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -31,12 +32,19 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.swagger.converter.Order2OrderDocumentConverter;
+import io.swagger.converter.OrderDocument2OrderConverter;
+import io.swagger.repo.OrderRepo;
+
 @Component
 @EnableScheduling
 public class StoreApiCache {
 	static final Logger log = LoggerFactory.getLogger(StoreApiCache.class);
 
 	private final ObjectMapper objectMapper;
+
+	@Value("${app.service.order.externalDatabase.enabled:false}")
+	private boolean externalDatabaseEnabled;
 
 	@Value("${petstore.service.product.url:}")
 	private String petStoreProductServiceURL;
@@ -48,13 +56,47 @@ public class StoreApiCache {
 	@Qualifier(value = "cacheManager")
 	private CacheManager cacheManager;
 
+//	@Resource
+//	private OrderRepo orderRepo;
+	@Resource
+	private Order2OrderDocumentConverter order2OrderDocumentConverter;
+	@Resource
+	private OrderDocument2OrderConverter orderDocument2OrderConverter;
+
 	@org.springframework.beans.factory.annotation.Autowired
 	public StoreApiCache(ObjectMapper objectMapper) {
 		this.objectMapper = objectMapper;
 	}
 
+	public Order getOrder(String id)
+	{
+		log.info("Getting order from external database");
+
+		if (!externalDatabaseEnabled)
+		{
+			return getInmemoryOrder(id);
+		}
+		return null;
+//		return orderDocument2OrderConverter.convert(orderRepo.findById(id).block());
+
+//		return orderRepo.findById(id)
+//			  .map(orderDocument2OrderConverter::convert)
+//			  .orElse(null);
+	}
+
+	public void saveOrder(Order order)
+	{
+		if (externalDatabaseEnabled)
+		{
+			log.info("Saving order to external database");
+
+//			orderRepo.save(order2OrderDocumentConverter.convert(order));
+		}
+	}
+
 	@Cacheable("orders")
-	public Order getOrder(String id) {
+	public Order getInmemoryOrder(String id)
+	{
 		log.info(String.format("PetStoreOrderService creating new order id:%s and caching it", id));
 		return new Order();
 	}

@@ -16,7 +16,7 @@ public class PetstoreappApplication {
 	private static Logger logger = LoggerFactory.getLogger(PetstoreappApplication.class);
 
 	public static void main(String[] args) {
-		ApplicationInsights.attach();
+//		ApplicationInsights.attach();
 		SpringApplication.run(PetstoreappApplication.class, args);
 		logger.info("PetStoreApp started up... " + System.getProperty("catalina.base"));
 		try {

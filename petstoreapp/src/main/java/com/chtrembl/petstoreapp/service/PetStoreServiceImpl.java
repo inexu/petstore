@@ -13,6 +13,7 @@ import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -43,6 +44,9 @@ import reactor.core.publisher.Mono;
 @Service
 public class PetStoreServiceImpl implements PetStoreService {
 	private static final Logger logger = LoggerFactory.getLogger(PetStoreServiceImpl.class);
+
+	@Value("${app.orderReservationReporting.enabled}")
+	private boolean orderReservationReportingEnabled;
 
 	private final User sessionUser;
 	private final ContainerEnvironment containerEnvironment;
@@ -227,18 +231,21 @@ public class PetStoreServiceImpl implements PetStoreService {
 					.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
 					.configure(SerializationFeature.FAIL_ON_SELF_REFERENCES, false).writeValueAsString(updatedOrder);
 
-			Consumer<HttpHeaders> consumer = it -> it.addAll(this.webRequest.getHeaders());
+			if (orderReservationReportingEnabled)
+			{
+				Consumer<HttpHeaders> consumer = it -> it.addAll(this.webRequest.getHeaders());
 
-			updatedOrder = this.orderServiceWebClient.post().uri("petstoreorderservice/v2/store/order")
-					.body(BodyInserters.fromPublisher(Mono.just(orderJSON), String.class))
-					.accept(MediaType.APPLICATION_JSON)
-					.headers(consumer)
-					.header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-					.header("Cache-Control", "no-cache")
-					.retrieve()
-					.bodyToMono(Order.class).block();
+				updatedOrder = this.orderServiceWebClient.post().uri("petstoreorderservice/v2/store/order")
+					  .body(BodyInserters.fromPublisher(Mono.just(orderJSON), String.class))
+					  .accept(MediaType.APPLICATION_JSON)
+					  .headers(consumer)
+					  .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+					  .header("Cache-Control", "no-cache")
+					  .retrieve()
+					  .bodyToMono(Order.class).block();
 
-			sendOrderReservation(updatedOrder, sessionUser, consumer);
+				sendOrderReservation(updatedOrder, sessionUser, consumer);
+			}
 		} catch (Exception e) {
 			logger.warn(e.getMessage());
 		}
