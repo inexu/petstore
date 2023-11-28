@@ -20,10 +20,13 @@ spring:
   cloud:
     azure:
       cosmos:
-        endpoint: https://petstore-cosmos.mongo.cosmos.azure.com:443/
+#        endpoint: https://localhost:8081
+#        key: C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==
+        endpoint: https://petstore-cosmos2.documents.azure.com:443/
         database: petstoreorder1q
-        key: 3a9vgkmmTw8o37r5Zjl2R5uJAMeu0vrBAs7Oxf9O8WvOy3hkQIQtrNKM3p2Sb0wif7fSZE6CZYIDACDbnKCb7A==
-        secondaryKey: 9ctVtNJyiwLIDA1uAAcOZIrTfPBK0rGbZ8cNfh2BKeHRhMOcagCWKnyabKtl38svV9tlyVJ9yualACDbVApojw==
+        container: order
+        key: Rsl7VK4ozCcgBxh6fWbCPna9yl9KAvIFH41dVFs4oqh2B4dd3DCRh3lzAsXWSR9jZ3iO6iqjbBO6ACDbMD57ZQ==
+        secondaryKey: mTkTqWOpqruJ5MdgiPNyhcfzj3OPesIDKgWhpLhlIVseFbdF0smogKIFB8zfGolZQxVu2auK9Eg3ACDbfkw2gg==
         populate-query-metrics: true
         responseDiagnosticsEnabled: true
 
@@ -45,6 +48,7 @@ logging:
     org:
       springframework:
         context: DEBUG
+
 debug: true
 
 management:

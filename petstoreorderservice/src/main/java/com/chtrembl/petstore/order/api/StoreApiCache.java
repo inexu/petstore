@@ -32,9 +32,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.swagger.converter.Order2OrderDocumentConverter;
-import io.swagger.converter.OrderDocument2OrderConverter;
-import io.swagger.repo.OrderRepo;
+import io.swagger.service.OrderService;
+
 
 @Component
 @EnableScheduling
@@ -56,12 +55,8 @@ public class StoreApiCache {
 	@Qualifier(value = "cacheManager")
 	private CacheManager cacheManager;
 
-//	@Resource
-//	private OrderRepo orderRepo;
 	@Resource
-	private Order2OrderDocumentConverter order2OrderDocumentConverter;
-	@Resource
-	private OrderDocument2OrderConverter orderDocument2OrderConverter;
+	private OrderService orderService;
 
 	@org.springframework.beans.factory.annotation.Autowired
 	public StoreApiCache(ObjectMapper objectMapper) {
@@ -76,22 +71,20 @@ public class StoreApiCache {
 		{
 			return getInmemoryOrder(id);
 		}
-		return null;
-//		return orderDocument2OrderConverter.convert(orderRepo.findById(id).block());
 
-//		return orderRepo.findById(id)
-//			  .map(orderDocument2OrderConverter::convert)
-//			  .orElse(null);
+		return orderService.findById(id);
 	}
 
-	public void saveOrder(Order order)
+	public Order saveOrder(Order order)
 	{
 		if (externalDatabaseEnabled)
 		{
 			log.info("Saving order to external database");
 
-//			orderRepo.save(order2OrderDocumentConverter.convert(order));
+			return orderService.save(order);
 		}
+
+		return order;
 	}
 
 	@Cacheable("orders")
