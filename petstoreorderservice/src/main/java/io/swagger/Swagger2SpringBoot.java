@@ -79,8 +79,10 @@ public class Swagger2SpringBoot implements CommandLineRunner {
 	}
 
 	public static void main(String[] args) throws Exception {
-		System.setProperty("javax.net.ssl.trustStore", "NUL");
-		System.setProperty("javax.net.ssl.trustStoreType", "Windows-ROOT");
+		// Disable certificates check for local testing with CosmosDB emulator
+//		System.setProperty("javax.net.ssl.trustStore", "NUL");
+//		System.setProperty("javax.net.ssl.trustStoreType", "Windows-ROOT");
+
 		ApplicationInsights.attach();
 		new SpringApplication(Swagger2SpringBoot.class).run(args);
 	}

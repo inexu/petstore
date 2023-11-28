@@ -22,11 +22,11 @@ spring:
       cosmos:
 #        endpoint: https://localhost:8081
 #        key: C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==
-        endpoint: https://petstore-cosmos2.documents.azure.com:443/
+        endpoint: https://petstore-cosmos.documents.azure.com:443/
         database: petstoreorder1q
         container: order
-        key: Rsl7VK4ozCcgBxh6fWbCPna9yl9KAvIFH41dVFs4oqh2B4dd3DCRh3lzAsXWSR9jZ3iO6iqjbBO6ACDbMD57ZQ==
-        secondaryKey: mTkTqWOpqruJ5MdgiPNyhcfzj3OPesIDKgWhpLhlIVseFbdF0smogKIFB8zfGolZQxVu2auK9Eg3ACDbfkw2gg==
+        key: S2NOalTbKqDvkneBaq9VF8fLhikGrqCGSgoxFY0spAVxFfGoExRVdJfOBOse2OhJhgVwDDfaLTQ4ACDb2cru2w==
+        secondaryKey: AOs5tMWpscEKfjbgB8qa8NVHzk4gMRNAorxoU59b9ZZtOxK9EVissk2JoQLNqAxTKgKySadJHMeRACDb7ZgCmg==
         populate-query-metrics: true
         responseDiagnosticsEnabled: true
 

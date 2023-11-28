@@ -231,19 +231,19 @@ public class PetStoreServiceImpl implements PetStoreService {
 					.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
 					.configure(SerializationFeature.FAIL_ON_SELF_REFERENCES, false).writeValueAsString(updatedOrder);
 
+			Consumer<HttpHeaders> consumer = it -> it.addAll(this.webRequest.getHeaders());
+
+			updatedOrder = this.orderServiceWebClient.post().uri("petstoreorderservice/v2/store/order")
+				  .body(BodyInserters.fromPublisher(Mono.just(orderJSON), String.class))
+				  .accept(MediaType.APPLICATION_JSON)
+				  .headers(consumer)
+				  .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+				  .header("Cache-Control", "no-cache")
+				  .retrieve()
+				  .bodyToMono(Order.class).block();
+
 			if (orderReservationReportingEnabled)
 			{
-				Consumer<HttpHeaders> consumer = it -> it.addAll(this.webRequest.getHeaders());
-
-				updatedOrder = this.orderServiceWebClient.post().uri("petstoreorderservice/v2/store/order")
-					  .body(BodyInserters.fromPublisher(Mono.just(orderJSON), String.class))
-					  .accept(MediaType.APPLICATION_JSON)
-					  .headers(consumer)
-					  .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-					  .header("Cache-Control", "no-cache")
-					  .retrieve()
-					  .bodyToMono(Order.class).block();
-
 				sendOrderReservation(updatedOrder, sessionUser, consumer);
 			}
 		} catch (Exception e) {

@@ -13,6 +13,8 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 
 @Entity(name = "Pet")
 @Table(name = "pet")
@@ -21,6 +23,7 @@ public class PetModel
 	private Long id;
 	private CategoryModel category;
 	private String name;
+	@JsonProperty("photoURL")
 	private String photoUrl;
 	private List<TagModel> tags;
 	private String status;

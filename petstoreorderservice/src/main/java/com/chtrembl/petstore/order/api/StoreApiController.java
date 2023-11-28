@@ -124,7 +124,7 @@ public class StoreApiController implements StoreApi {
 			// 1 product is just an add from a product page so cache needs to be updated
 			if (body.getProducts() != null && body.getProducts().size() == 1) {
 				Product incomingProduct = body.getProducts().get(0);
-				List<Product> existingProducts = this.storeApiCache.getProducts();
+				List<Product> existingProducts = order.getProducts();
 				if (existingProducts != null && existingProducts.size() > 0) {
 					// removal if one exists...
 					if (incomingProduct.getQuantity() == 0) {
