@@ -13,9 +13,9 @@ spring:
     pathmatch:
       matching-strategy: ant_path_matcher
   datasource:
-    url: jdbc:postgresql://petstoreapp1q.postgres.database.azure.com:5432/petstorepetservice_db?sslmode=require
-    username: petstoreapp
-    password: qweASD123_!
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USER}
+    password: ${DATABASE_PASS}
   jpa:
     hibernate:
       ddl-auto: update
@@ -32,11 +32,17 @@ management:
   endpoint:
     httptrace:
       enabled: true
-    
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+
+debug: false
+
 data:
   pets:
     - id: 1
-      category: 
+      category:
         id: 1
         name: "Dog"
       name: "Afador"

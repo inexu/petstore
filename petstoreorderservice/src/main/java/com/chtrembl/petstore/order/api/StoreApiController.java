@@ -109,8 +109,8 @@ public class StoreApiController implements StoreApi {
 
 		String acceptType = request.getHeader("Content-Type");
 		String contentType = request.getHeader("Content-Type");
-		if (acceptType != null && contentType != null && acceptType.contains("application/json")
-				&& contentType.contains("application/json")) {
+		if (acceptType != null && contentType != null /*&& acceptType.contains("application/json")
+				&& contentType.contains("application/json")*/) {
 
 			log.info(String.format(
 					"PetStoreOrderService incoming POST request to petstoreorderservice/v2/order/placeOder for order id:%s",
@@ -188,8 +188,8 @@ public class StoreApiController implements StoreApi {
 
 		String acceptType = request.getHeader("Content-Type");
 		String contentType = request.getHeader("Content-Type");
-		if (acceptType != null && contentType != null && acceptType.contains("application/json")
-				&& contentType.contains("application/json")) {
+		if (true/*acceptType != null && contentType != null && acceptType.contains("application/json")
+				&& contentType.contains("application/json")*/) {
 
 			log.info(String.format(
 					"PetStoreOrderService incoming GET request to petstoreorderservice/v2/order/getOrderById for order id:%s",

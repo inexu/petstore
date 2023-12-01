@@ -2,7 +2,9 @@ package com.chtrembl.petstore.order.api;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.annotation.Resource;
 
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
@@ -42,7 +44,9 @@ public class StoreApiCache {
 
 	private final ObjectMapper objectMapper;
 
-	@Value("${app.service.order.externalDatabase.enabled:false}")
+	private Map<String, Order> orderCache = new HashMap<>();
+
+	@Value("${spring.cloud.azure.cosmos.enabled}")
 	private boolean externalDatabaseEnabled;
 
 	@Value("${petstore.service.product.url:}")
@@ -58,21 +62,20 @@ public class StoreApiCache {
 	@Resource
 	private OrderService orderService;
 
-	@org.springframework.beans.factory.annotation.Autowired
+	@Autowired
 	public StoreApiCache(ObjectMapper objectMapper) {
 		this.objectMapper = objectMapper;
 	}
 
 	public Order getOrder(String id)
 	{
-		log.info("Getting order from external database");
-
-		if (!externalDatabaseEnabled)
+		if (externalDatabaseEnabled)
 		{
-			return getInmemoryOrder(id);
+			log.info("Getting order from external database");
+			return orderService.findById(id);
 		}
 
-		return orderService.findById(id);
+		return getInmemoryOrder(id);
 	}
 
 	public Order saveOrder(Order order)
@@ -80,18 +83,26 @@ public class StoreApiCache {
 		if (externalDatabaseEnabled)
 		{
 			log.info("Saving order to external database");
-
 			return orderService.save(order);
 		}
 
-		return order;
+		return saveInmemoryOrder(order);
 	}
 
 	@Cacheable("orders")
 	public Order getInmemoryOrder(String id)
 	{
 		log.info(String.format("PetStoreOrderService creating new order id:%s and caching it", id));
-		return new Order();
+
+		Order order = orderCache.get(id);
+
+		return order == null ? new Order() : order;
+	}
+
+	private Order saveInmemoryOrder(Order order)
+	{
+		orderCache.put(order.getId(), order);
+		return order;
 	}
 
 	@Cacheable("orders")

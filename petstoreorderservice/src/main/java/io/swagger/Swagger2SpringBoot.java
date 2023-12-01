@@ -1,5 +1,7 @@
 package io.swagger;
 
+import java.util.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,31 +36,44 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 public class Swagger2SpringBoot implements CommandLineRunner {
 	static final Logger log = LoggerFactory.getLogger(Swagger2SpringBoot.class);
 
+	@Value("${spring.cloud.azure.cosmos.enabled}")
+	private boolean externalDatabaseEnabled;
+
 	@Bean
 	public CosmosClient cosmosClient(
 		  @Value("${spring.cloud.azure.cosmos.endpoint}") String accountHost,
 		  @Value("${spring.cloud.azure.cosmos.key}") String accountKey) {
-		return new CosmosClientBuilder()
+		return externalDatabaseEnabled ? new CosmosClientBuilder()
 			  .endpoint(accountHost)
 			  .key(accountKey)
 			  .consistencyLevel(ConsistencyLevel.EVENTUAL)
-			  .buildClient();
+			  .buildClient() : null;
 	}
 
 	@Bean
 	public CosmosDatabase cosmosDatabase(
-		  CosmosClient cosmosClient, @Value("${spring.cloud.azure.cosmos.database}") String databaseName) {
-		CosmosDatabaseResponse databaseResponse = cosmosClient.createDatabaseIfNotExists(databaseName);
-		return cosmosClient.getDatabase(databaseResponse.getProperties().getId());
+		  Optional<CosmosClient> cosmosClient, @Value("${spring.cloud.azure.cosmos.database}") String databaseName) {
+		if (!externalDatabaseEnabled)
+		{
+			return null;
+		}
+
+		CosmosDatabaseResponse databaseResponse = cosmosClient.get().createDatabaseIfNotExists(databaseName);
+		return cosmosClient.get().getDatabase(databaseResponse.getProperties().getId());
 	}
 
 	@Bean
 	public CosmosContainer cosmosContainer(
-		  CosmosDatabase cosmosDatabase, @Value("${spring.cloud.azure.cosmos.container}") String containerName) {
+		  Optional<CosmosDatabase> cosmosDatabase, @Value("${spring.cloud.azure.cosmos.container}") String containerName) {
+		if (!externalDatabaseEnabled)
+		{
+			return null;
+		}
+
 		CosmosContainerProperties containerProperties =
 			  new CosmosContainerProperties(containerName, "/id");
-		CosmosContainerResponse containerResponse = cosmosDatabase.createContainerIfNotExists(containerProperties);
-		return cosmosDatabase.getContainer(containerResponse.getProperties().getId());
+		CosmosContainerResponse containerResponse = cosmosDatabase.get().createContainerIfNotExists(containerProperties);
+		return cosmosDatabase.get().getContainer(containerResponse.getProperties().getId());
 	}
 
 	@Bean

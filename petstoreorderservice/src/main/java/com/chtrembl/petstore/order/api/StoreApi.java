@@ -30,7 +30,7 @@ import io.swagger.annotations.Authorization;
 
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-21T10:17:19.885-05:00")
 
-@Api(value = "store", description = "the store API")
+@Api(value = "store", description = "the store API, v.0.0.2")
 public interface StoreApi {
 
 	// wired in for the scenario the interface declarations need access to scoped

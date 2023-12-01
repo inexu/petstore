@@ -1,5 +1,7 @@
 package io.swagger.repo;
 
+import java.util.Optional;
+
 import org.springframework.stereotype.Repository;
 
 import com.azure.cosmos.CosmosContainer;
@@ -13,9 +15,9 @@ public class OrderRepo
 {
 	private final CosmosContainer container;
 
-	public OrderRepo(CosmosContainer container)
+	public OrderRepo(Optional<CosmosContainer> container)
 	{
-		this.container = container;
+		this.container = container.orElse(null);
 	}
 
 	public Order save(Order order)
