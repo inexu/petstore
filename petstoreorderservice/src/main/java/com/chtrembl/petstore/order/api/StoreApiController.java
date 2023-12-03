@@ -5,6 +5,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.Generated;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
 
@@ -13,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +25,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.context.request.NativeWebRequest;
 
+import com.azure.identity.DefaultAzureCredential;
+import com.azure.identity.DefaultAzureCredentialBuilder;
+import com.azure.messaging.servicebus.ServiceBusClientBuilder;
+import com.azure.messaging.servicebus.ServiceBusMessage;
+import com.azure.messaging.servicebus.ServiceBusSenderClient;
 import com.chtrembl.petstore.order.model.ContainerEnvironment;
 import com.chtrembl.petstore.order.model.Order;
 import com.chtrembl.petstore.order.model.Product;
@@ -30,7 +37,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.swagger.annotations.ApiParam;
 
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-21T10:17:19.885-05:00")
+@Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-21T10:17:19.885-05:00")
 
 @Controller
 @RequestMapping("${openapi.swaggerPetstore.base-path:/petstoreorderservice/v2}")
@@ -39,8 +46,16 @@ public class StoreApiController implements StoreApi {
 	static final Logger log = LoggerFactory.getLogger(StoreApiController.class);
 
 	private final ObjectMapper objectMapper;
-
 	private final NativeWebRequest request;
+
+	@Value("${app.orderReservationReporting.enabled:false}")
+	private boolean orderReservationReportingEnabled;
+	@Value("${app.orderReservationReporting.serviceBus.queueName}")
+	private String orderReservationQueueName;
+	@Value("${app.orderReservationReporting.serviceBus.namespace}")
+	private String orderReservationServiceBusNamespace;
+	@Value("${app.orderReservationReporting.serviceBus.connectionString}")
+	private String orderReservationConnectionString;
 
 	@Autowired
 	@Qualifier(value = "cacheManager")
@@ -168,8 +183,8 @@ public class StoreApiController implements StoreApi {
 
 			try {
 				String orderJSON = new ObjectMapper().writeValueAsString(order);
-
 				ApiUtil.setResponse(request, "application/json", orderJSON);
+				performOrderReservation(orderJSON, order.getId());
 				return new ResponseEntity<>(HttpStatus.OK);
 			} catch (IOException e) {
 				log.error("Couldn't serialize response for content type application/json", e);
@@ -178,7 +193,25 @@ public class StoreApiController implements StoreApi {
 		}
 
 		return new ResponseEntity<Order>(HttpStatus.NOT_IMPLEMENTED);
+	}
 
+	private void performOrderReservation(String orderJson, String orderId)
+	{
+		if (!orderReservationReportingEnabled)
+		{
+			return;
+		}
+
+		String namespace = orderReservationServiceBusNamespace + ".servicebus.windows.net";
+		log.info("Sending order details to service bus with namespace {}", namespace);
+		ServiceBusSenderClient senderClient = new ServiceBusClientBuilder()
+			  .connectionString(orderReservationConnectionString)
+			  .sender()
+			  .queueName(orderReservationQueueName)
+			  .buildClient();
+
+		senderClient.sendMessage(new ServiceBusMessage(orderJson));
+		log.info("Order with id {} has been sent to queue {}", orderId, orderReservationQueueName);
 	}
 
 	@Override

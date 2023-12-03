@@ -31,6 +31,14 @@ spring:
         populate-query-metrics: true
         responseDiagnosticsEnabled: true
 
+app:
+  orderReservationReporting:
+    enabled: true
+    serviceBus:
+      connectionString: Endpoint=sb://petstore-bus.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=i4dYcOTC9pYGgEWMwRL/2dbjy/CT+uUJI+ASbGznZXc=
+      namespace: petstore-bus
+      queueName: order
+
 logging:
   level:
     org:
