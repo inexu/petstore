@@ -35,7 +35,7 @@ app:
   orderReservationReporting:
     enabled: true
     serviceBus:
-      connectionString: Endpoint=sb://petstore-bus.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=i4dYcOTC9pYGgEWMwRL/2dbjy/CT+uUJI+ASbGznZXc=
+      connectionString: Endpoint=sb://petstore-bus.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=mf8IR1OiUr+kIq2v004BIcFO69sQiGOjs+ASbCrJR7E=
       namespace: petstore-bus
       queueName: order
 

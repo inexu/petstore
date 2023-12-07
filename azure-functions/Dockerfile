@@ -1,16 +1,18 @@
-#
-# Build stage
-#
-FROM maven:3.8.4-openjdk-17-slim AS build
-WORKDIR /build
-COPY pom.xml .
-COPY src ./src
-RUN mvn clean package
+ARG JAVA_VERSION=11
+FROM mcr.microsoft.com/azure-functions/java:3.0-java$JAVA_VERSION-build AS installer-env
 
-#
-# Package stage
-#
-FROM openjdk:17-slim
-COPY --from=build /build/target/*.jar /app/azure-functions.jar
-EXPOSE 7071
-ENTRYPOINT ["java","-jar","/app/azure-functions.jar"]
+COPY . /src/java-function-app
+RUN cd /src/java-function-app && \
+    mkdir -p /home/site/wwwroot && \
+    mvn clean package && \
+    cd ./target/azure-functions/ && \
+    cd $(ls -d */|head -n 1) && \
+    cp -a . /home/site/wwwroot
+
+FROM mcr.microsoft.com/azure-functions/java:3.0-java$JAVA_VERSION-appservice
+#FROM mcr.microsoft.com/azure-functions/java:3.0-java$JAVA_VERSION
+
+ENV AzureWebJobsScriptRoot=/home/site/wwwroot \
+    AzureFunctionsJobHost__Logging__Console__IsEnabled=true
+
+COPY --from=installer-env ["/home/site/wwwroot", "/home/site/wwwroot"]

@@ -33,7 +33,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.swagger.annotations.ApiParam;
-import io.swagger.repo.ProductRepo;
 
 
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-21T10:17:09.908-05:00")
@@ -56,8 +55,8 @@ public class ProductApiController implements ProductApi {
 
 //	@Resource
 //	private ProductService productService;
-	@Resource
-	private ProductRepo productRepo;
+//	@Resource
+//	private ProductRepo productRepo;
 
 	@Override
 	public DataPreload getBeanToBeAutowired() {
@@ -108,9 +107,9 @@ public class ProductApiController implements ProductApi {
 					"PetStoreProductService incoming GET request to petstoreproductservice/v2/pet/findProductsByStatus?status=%s",
 					status));
 			try {
-				String petsJSON = new ObjectMapper().writeValueAsString(productRepo.findAll());
+//				String petsJSON = new ObjectMapper().writeValueAsString(productRepo.findAll());
 //				String petsJSON = new ObjectMapper().writeValueAsString(productService.getAllProducts());
-//				String petsJSON = new ObjectMapper().writeValueAsString(dataPreload.getProducts());
+				String petsJSON = new ObjectMapper().writeValueAsString(dataPreload.getProducts());
 				ApiUtil.setResponse(request, "application/json", petsJSON);
 				return new ResponseEntity<>(HttpStatus.OK);
 			} catch (JsonProcessingException e) {
