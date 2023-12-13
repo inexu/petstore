@@ -60,7 +60,7 @@ spring:
             client-id: ${AD_B2C_CLIENT_ID:}
             client-secret: ${AD_B2C_CLIENT_SECRET:}
           login-flow: sign-up-or-sign-in
-#          logout-success-url: https://demo-petstoreapp-eastus.azurewebsites.net
+#          logout-success-url: https://demo-petstoreapp-eastus1.azurewebsites.net
           logout-success-url: ${AD_B2C_LOGOUT_SUCCESS_URL:}
           user-flows:
             sign-up-or-sign-in: B2C_1_signupsignin

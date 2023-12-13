@@ -29,7 +29,8 @@ import com.microsoft.applicationinsights.attach.ApplicationInsights;
 
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
-@SpringBootApplication(exclude={ DataSourceAutoConfiguration.class})
+//@SpringBootApplication(exclude={ DataSourceAutoConfiguration.class})
+@SpringBootApplication
 @EnableCaching
 @EnableSwagger2
 @ComponentScan(basePackages = { "io.swagger", "io.swagger.repo", "com.chtrembl.petstore.order.api", "io.swagger.configuration" })
