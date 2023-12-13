@@ -52,16 +52,16 @@ spring:
       active-directory:
         b2c:
           enabled: true
-          base-uri: https://demopetstore1q.b2clogin.com/demopetstore1q.onmicrosoft.com/
-#          base-uri: ${AD_B2C_BASE_URI:}
+#          base-uri: https://demopetstore1q.b2clogin.com/demopetstore1q.onmicrosoft.com/
+          base-uri: ${AD_B2C_BASE_URI:}
           credential:
-            client-id: e6e263ee-f47a-40ee-8d93-e06a3fd6b8ed
-            client-secret: 'OID8Q~veRZR3KFZ4us675CwuypbgagPcwzFXocD5'
-#            client-id: ${AD_B2C_CLIENT_ID:}
-#            client-secret: ${AD_B2C_CLIENT_SECRET:}
+#            client-id: e6e263ee-f47a-40ee-8d93-e06a3fd6b8ed
+#            client-secret: 'OID8Q~veRZR3KFZ4us675CwuypbgagPcwzFXocD5'
+            client-id: ${AD_B2C_CLIENT_ID:}
+            client-secret: ${AD_B2C_CLIENT_SECRET:}
           login-flow: sign-up-or-sign-in
-          logout-success-url: https://demo-petstoreapp-eastus.azurewebsites.net
-#          logout-success-url: ${AD_B2C_LOGOUT_SUCCESS_URL:}
+#          logout-success-url: https://demo-petstoreapp-eastus.azurewebsites.net
+          logout-success-url: ${AD_B2C_LOGOUT_SUCCESS_URL:}
           user-flows:
             sign-up-or-sign-in: B2C_1_signupsignin
             profile-edit: B2C_1_profileediting
