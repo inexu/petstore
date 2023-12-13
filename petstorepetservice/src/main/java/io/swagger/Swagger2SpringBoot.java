@@ -14,7 +14,8 @@ import com.microsoft.applicationinsights.attach.ApplicationInsights;
 
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
-@SpringBootApplication(exclude = { DataSourceAutoConfiguration.class })
+//@SpringBootApplication(exclude = { DataSourceAutoConfiguration.class })
+@SpringBootApplication
 @EnableSwagger2
 @ComponentScan(basePackages = { "io.swagger", "com.chtrembl.petstore.pet.api", "io.swagger.configuration" })
 public class Swagger2SpringBoot implements CommandLineRunner {
